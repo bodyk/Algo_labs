@@ -5,21 +5,21 @@ class TestZigZagTraversal(unittest.TestCase):
 
     def test_case_1(self):
         matrix = [
-            [1, 2, 3, 4, 5],
-            [6, 7, 8, 9, 10],
-            [11, 12, 13, 14, 15],
-            [16, 17, 18, 19, 20],
-            [21, 22, 23, 24, 25]
+            [1, 2, 6, 7, 15],
+            [3, 5, 8, 14, 16],
+            [4, 9, 13, 17, 22],
+            [10, 12, 18, 21, 23],
+            [11, 19, 20, 24, 25]
         ]
-        expected = [1, 2, 6, 11, 7, 3, 4, 8, 12, 16, 21, 17, 13, 9, 5, 10, 14, 18, 22, 23, 19, 15, 20, 24, 25]
+        expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
         self.assertEqual(traverse_zig_zag(matrix), expected)
 
     def test_case_2(self):
         matrix = [
-            [1, 2, 3, 4],
-            [5, 6, 7, 8]
+            [1, 2, 5, 6],
+            [3, 4, 7, 8]
         ]
-        expected = [1, 2, 5, 6, 3, 4, 7, 8]
+        expected = [1, 2, 3, 4, 5, 6, 7, 8]
         self.assertEqual(traverse_zig_zag(matrix), expected)
 
     def test_case_3(self):
