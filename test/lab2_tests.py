@@ -1,5 +1,5 @@
 import unittest
-from lab2 import min_price
+from src.lab2 import min_price
 
 class TestMinPrice(unittest.TestCase):
 
