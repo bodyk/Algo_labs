@@ -1,3 +1,5 @@
+from collections import deque
+
 def read_adjacency_list(file_path):
     with open(file_path, 'r') as file:
         graph = {}
@@ -6,14 +8,32 @@ def read_adjacency_list(file_path):
             graph[vertex.strip()] = [e.strip() for e in edges.split()]
     return graph
 
+def bfs(graph, start):
+    visited = set()
+    queue = deque([start])
+
+    while queue:
+        vertex = queue.popleft()
+        if vertex not in visited:
+            visited.add(vertex)
+            queue.extend([u for u in graph[vertex] if u not in visited])
+
+    return visited
+
 def find_roots(graph):
-    # Всі вершини у графі є потенційними коренями спочатку
-    potential_roots = set(graph.keys())
-    # Перебираємо всі ребра і видаляємо цільові вершини з потенційних коренів
+    all_vertices = set(graph.keys())
+    # У вападку, коли граф може мати вершини без вихідних ребер, ми додаємо їх до графу як ключі з пустим списком.
     for edges in graph.values():
         for edge in edges:
-            potential_roots.discard(edge)
-    return list(potential_roots)
+            if edge not in graph:
+                graph[edge] = []
+
+    # Перевіряємо для кожної вершини, чи можна досягти всіх інших вершин
+    for vertex in all_vertices:
+        if bfs(graph, vertex) == all_vertices:
+            return [vertex]  # Знаходимо кореневу вершину та повертаємо її у списку
+
+    return []  # Якщо коренева вершина не знайдена, повертаємо порожній список
 
 file_path = 'src/input.txt'
 graph = read_adjacency_list(file_path)
