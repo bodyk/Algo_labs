@@ -1,47 +1,77 @@
-from collections import defaultdict, deque
+from collections import defaultdict
 
-def topological_sort(dependencies, nodes):
-    incoming_edges_degree = {node: 0 for node in nodes}
-    for node, deps in dependencies.items():
-        for dep in deps:
-            incoming_edges_degree[dep] += 1
-    
-    # Queue for all nodes with no incoming edge
-    queue = deque([node for node in nodes if incoming_edges_degree[node] == 0])
-    sorted_order = []
+class Graph:
+    def __init__(self):
+        self.adjacency_list = defaultdict(list)
 
-    while queue:
-        node = queue.popleft()
-        sorted_order.append(node)
-        # Decrease the incoming_edges_degree of dependent nodes
-        for dep in dependencies[node]:
-            incoming_edges_degree[dep] -= 1
-            if incoming_edges_degree[dep] == 0:
-                queue.append(dep)
+    def find_mother_util(self, starting_vertex, visited):
+        visited.add(starting_vertex)
+        for neighbour in self.adjacency_list[starting_vertex]:
+            if neighbour not in visited:
+                self.find_mother_util(neighbour, visited)
 
-    if len(sorted_order) == len(nodes):
-        return sorted_order
-    else:
-        return []  # There is a cycle
+    def dfs_recursive_util(self, starting_vertex, visited, sequence):
+        if starting_vertex not in visited:
+            visited.add(starting_vertex)
+            for neighbour in self.adjacency_list[starting_vertex]:
+                self.dfs_recursive_util(neighbour, visited, sequence)
+                if neighbour not in sequence: sequence.append(neighbour)
+        return sequence
 
-def process_documents(input_file, output_file):
-    with open(input_file, 'r') as file:
-        lines = file.readlines()
+    def dfs(self):
+        visited = set()
+        sequence = []
+        starting_vertex = self.find_mother()
+        self.dfs_recursive_util(starting_vertex, visited, sequence)
+        sequence.append(starting_vertex)
+        return sequence
 
-    dependencies = defaultdict(list)
-    nodes = set()
+    def add_edge(self, key, value):
+        if isinstance(value, list):
+            self.adjacency_list[key] = value
+        else:
+            self.adjacency_list[key].append(value)
 
-    for line in lines:
-        a, b = line.strip().split()
-        dependencies[b].append(a)
-        nodes.update([a, b])
+    def find_mother(self):
+        visited = set()
+        mother_vertex = ''
+        for vertex in list(self.adjacency_list):
+            if vertex not in visited:
+                self.find_mother_util(vertex, visited)
+                mother_vertex = vertex
 
-    sorted_docs = topological_sort(dependencies, nodes)
+        visited.clear()
+        self.find_mother_util(mother_vertex, visited)
+        if len(visited) != len(self.adjacency_list):
+            return -1
+        else:
+            return mother_vertex
 
-    with open(output_file, 'w') as file:
-        for doc in sorted_docs:
-            file.write(doc + '\n')
+def convert_file_to_dict(file_name):
+    last_key = []
+    d = {}
+    with open(file_name) as f:
+        for line in f:
+            if len(line) > 1:
+                (key, val) = line.split()
+                if key not in last_key:
+                    d[key] = [val]
+                    last_key.append(key)
+                else:
+                    d[key].append(val)
+    return d
 
-input_filename = 'src/govern.in'
-output_filename = 'src/govern.out'
-process_documents(input_filename, output_filename)
+def write_to_file(file_name, obj_to_write):
+    with open(file_name, 'w') as f:
+        for element in obj_to_write:
+            print(element, end='\n', file=f)
+
+def build_graph(file_name):
+    dictionary_to_process = convert_file_to_dict(file_name)
+    graph = Graph()
+    for key in dictionary_to_process.keys():
+        graph.add_edge(key, dictionary_to_process[key])
+    return graph
+
+if __name__ == '__main__':
+    write_to_file('src/govern.out', build_graph('src/govern.in').dfs())
