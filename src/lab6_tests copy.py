@@ -3,7 +3,7 @@
 
 import unittest
 # from lab6 import rabin_karp_search
-from ..src.lab6 import rabin_karp_search
+from lab6 import rabin_karp_search
 
 class TestRabinKarpSearch(unittest.TestCase):
     def test_basic(self):

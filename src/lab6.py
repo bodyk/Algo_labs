@@ -1,47 +1,37 @@
-def rabin_karp_search(haystack, needle):
-    if haystack == "" or needle == "" or len(needle) > len(haystack):
+def calculate_hash(s, base, prime):
+    hash_value = 0
+    for char in s:
+        hash_value = (base * hash_value + ord(char)) % prime
+    return hash_value
+
+def recalculate_hash(old_hash, old_char, new_char, h, base, prime):
+    new_hash = (base * (old_hash - ord(old_char) * h) + ord(new_char)) % prime
+    if new_hash < 0:
+        new_hash += prime
+    return new_hash
+
+def rabin_karp_search(text, pattern):
+    if not text or not pattern or len(pattern) > len(text):
         return []
 
-    base = 256  # Number of characters in the input alphabet
-    prime = 101  # A prime number
-    m, n = len(needle), len(haystack)
+    base = 256
+    prime = 101
+    pattern_hash = calculate_hash(pattern, base, prime)
+    window_hash = calculate_hash(text[:len(pattern)], base, prime)
 
-    # Hash value for pattern and text
-    p = t = 0
-    h = 1
-    result = []
+    h = pow(base, len(pattern) - 1, prime)
+    results = []
+    for i in range(len(text) - len(pattern) + 1):
+        if pattern_hash == window_hash:
+            if text[i:i + len(pattern)] == pattern:
+                results.append(i)
+        if i < len(text) - len(pattern):
+            window_hash = recalculate_hash(window_hash, text[i], text[i + len(pattern)], h, base, prime)
 
-    # The value of h would be "pow(d, M-1)%q"
-    for i in range(m-1):
-        h = (h * base) % prime
-
-    # Calculate the hash value of pattern and first window of text
-    for i in range(m):
-        p = (base * p + ord(needle[i])) % prime
-        t = (base * t + ord(haystack[i])) % prime
-
-    # Slide the pattern over text one by one
-    for i in range(n - m + 1):
-        # Check the hash values of current window of text and pattern
-        # If the hash values match then only check for characters one by one
-        if p == t:
-            # Check for characters one by one
-            if haystack[i:i+m] == needle:
-                result.append(i)
-
-        # Calculate hash value for next window of text: Remove leading digit,
-        # add trailing digit
-        if i < n - m:
-            t = (base * (t - ord(haystack[i]) * h) + ord(haystack[i + m])) % prime
-
-            # We might get negative value of t, converting it to positive
-            if t < 0:
-                t = t + prime
-
-    return result
+    return results
 
 # Example usage
-haystack = "ABABDABACDABABCABAB"
-needle = "ABABCABAB"
-result = rabin_karp_search(haystack, needle)
-print(result)
+if __name__ == "__main__":
+    sample_text = "ABAAABCDABCD"
+    sample_pattern = "ABC"
+    print("Occurrences at indices:", rabin_karp_search(sample_text, sample_pattern))
